@@ -1,0 +1,54 @@
+Prog->DeclL 'STATS' StatL $
+DeclL->'DECLS' Decls ;
+      |e                          /*epslon*/
+Decls->Decls , Decl               /*as declarações sao separadas por uma virgula*/
+      |Decl
+Decl->ID [ INT ]                 /*cada declaração contem o nome de uma variavel e o tamanho(s) cajo seja um array. não há atribuições*/
+     |ID [ INT ]  [ INT ]
+     |ID
+StatL->StatL Stat              /*lista de statements separados por  ;*/
+      |Stat
+Stat->Variavel = Exp;
+     |IF ( Exp )  { StatL }
+     |WHILE ( Exp )  { StatL }
+     |WRITE ( Lexp )
+     |READ ( Variable )
+Lexp->Lexp, "STRING"
+     |Lexp, Exp
+     |"STRING"
+     |Exp
+Exp->Exp & Equals                /* AND e OR lógicos*/
+    |Exp | Equals
+    |Equals
+Equals->Equals =  = Different
+       |Equals !  = Different
+       |Different
+Different->Different <  = Arit
+          |Different < Arit
+          |Different >  = Arit
+          |Different > Arit
+          |Arit
+Arit->Arit + Term
+     |Arit - Term
+     |Term
+Term->Term * Factor
+     |Term / Factor
+     |Term % Factor
+     |Factor
+Factor->!Value                  /*negação lógica e simétrico*/
+       |-Value
+       |Value
+Value->INT
+      |Variable
+      |#ID                        /****Implementação????Argumentos????****/
+Variable->ID
+         |ID[Exp]
+         |ID[Exp][Exp]
+
+
+
+
+
+
+*******************Acrescentar tipos****************************
+*******************
