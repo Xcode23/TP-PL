@@ -1,7 +1,7 @@
 all: compiler
 
-compiler:y.tab.c lex.yy.c
-	gcc -o compiler y.tab.c lex.yy.c
+compiler:y.tab.c lex.yy.c lib/Symbol.c lib/HashT.c
+	gcc -o compiler y.tab.c -lfl lex.yy.c lib/Symbol.c lib/HashT.c
 
 y.tab.c:TP2.y
 	yacc -d TP2.y
