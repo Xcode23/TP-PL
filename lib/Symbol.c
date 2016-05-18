@@ -26,21 +26,21 @@ void eraseVar(VarSymb* var){
   free(var);
 }
 
-int getLocation(htable* hashtable,char* key){
+int getLocation(htable hashtable,char* key){
   VarSymb* var=(VarSymb*)get(hashtable,key);
   int location=var->location;
   eraseVar(var);
   return location;
 }
 
-int getSize1(htable* hashtable,char* key){
+int getSize1(htable hashtable,char* key){
   VarSymb* var=(VarSymb*)get(hashtable,key);
   int size=var->size1;
   eraseVar(var);
   return size;
 }
 
-int getSize2(htable* hashtable,char* key){
+int getSize2(htable hashtable,char* key){
   VarSymb* var=(VarSymb*)get(hashtable,key);
   int size=var->size2;
   eraseVar(var);

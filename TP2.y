@@ -1,6 +1,7 @@
 %{
-  #include "lib/Symbol.h"
   #include <stdio.h>
+  #include "lib/Symbol.h"
+  #include "lib/Stack.h"
 
   void yyerror (char const *s);
   extern int yylex();
@@ -8,10 +9,12 @@
   extern char* yytext;
   extern FILE * yyin;
   FILE* output;
-  htable* varSymT;
+  htable varSymT;
+  Stack labelStack;
   int location=0;
-  int temp;
   int err=0;
+  int label=1;
+  int aux=0;
 
   void declaration(char* id, int size1, int size2);
 %}
@@ -23,7 +26,7 @@
 
 %start Prog
 
-%type <ivalue> INT
+%type <ivalue> INT Variable
 %type <string> ID STRING
 
 %token DECLS STATS STRING INT ID IF WHILE WRITE READ EQUAL DIFFERENT GE SE ERROR
@@ -49,11 +52,21 @@ StatL   :     StatL Stat
         |     Stat
         ;
 
-Stat    :     Variable '=' Exp ';'
-        |     IF '(' Exp ')'  '{' StatL '}'
-        |     WHILE '(' Exp ')'  '{' StatL '}'
-        |     WRITE '(' Lexp ')' ';'
-        |     READ '(' Variable ')' ';'
+Stat    :     Variable '=' Exp ';'    {fprintf(output,"storel %d\n",$1);}
+
+        |     IF '(' Exp ')'          {push(labelStack,label);
+                                       fprintf(output,"jz endif%d\n",label++);}
+              '{' StatL '}'           {fprintf(output,"endif%d:nop\n",pop(labelStack));}
+
+        |     WHILE                   {fprintf(output,"startloop%d:nop\n",label);}
+              '(' Exp ')'             {push(labelStack,label);
+                                       fprintf(output,"jz endloop%d\n",label++);}
+              '{' StatL '}'           {fprintf(output, "jump startloop%d\n", aux = pop(labelStack));
+                                       fprintf(output,"endloop%d\n",aux);}
+
+        |     WRITE '(' Lexp ')' ';'  {fprintf(output,"writes\n");}
+
+        |     READ '(' Variable ')' ';' {fprintf(output,"read\natoi\nstorel %d\n",$3);}
         ;
 
 Lexp    :     Lexp ',' STRING
@@ -62,7 +75,7 @@ Lexp    :     Lexp ',' STRING
         |     Exp
         ;
 
-Exp     :     Exp '&' Equals
+Exp     :     Exp '&' Equals/*must be in stack by the end*/
         |     Exp '|' Equals
         |     Equals
         ;
@@ -100,7 +113,7 @@ Value   :     INT
         |     '(' Exp ')'
         ;
 
-Variable:     ID
+Variable:     ID/*return offset*/
         |     ID '[' Exp ']'
         |     ID '[' Exp ']' '[' Exp ']'
         ;
@@ -131,6 +144,7 @@ void yyerror (char const *s){
 
 int main(int argc, char** argv){
   varSymT=newTable(hashString,equalsString,cloneString,cloneVar);
+  labelStack=newStack();
   if(argc<2 || argc>3){
     printf("Número errado de argumentos!\n");
     return -1;
@@ -143,8 +157,13 @@ int main(int argc, char** argv){
     yyin=fopen(argv[1],"r");
     output=fopen(argv[2],"w");
   }
+
   fprintf(output,"start\n");/******remember to move if functions are implemented******/
   yyparse();
+
+  deleteHtable(varSymT);   //cleanup
+  while(pop(labelStack));
+  free(labelStack);
 
   fclose(yyin);
   fclose(output);

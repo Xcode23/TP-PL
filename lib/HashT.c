@@ -24,14 +24,14 @@ struct _hashtable_{
   node** table;
 };
 
-htable* newTable(unsigned long (*hashfunc)(void*), int (*equalsfunc)(void*,void*), void* (*clonekeyfunc)(void*), void* (*clonevaluefunc)(void*)){
-  htable* newtable;
+htable newTable(unsigned long (*hashfunc)(void*), int (*equalsfunc)(void*,void*), void* (*clonekeyfunc)(void*), void* (*clonevaluefunc)(void*)){
+  htable newtable;
   int i;
 
   if(hashfunc==NULL || equalsfunc==NULL || clonekeyfunc==NULL || clonevaluefunc==NULL)
     return NULL;
 
-  if(!(newtable=(htable*)malloc(sizeof(htable))))
+  if(!(newtable=(htable)malloc(sizeof(struct _hashtable_))))
     return NULL;
 
   newtable->hashcode=hashfunc;
@@ -80,7 +80,7 @@ node* createNode(){
   return auxnode;
 }
 
-void deleteHtable(htable* hashtable){
+void deleteHtable(htable hashtable){
   int i;
   if(hashtable==NULL)return;
   for(i=0;i<hashtable->size;i++)
@@ -89,7 +89,7 @@ void deleteHtable(htable* hashtable){
   free(hashtable);
 }
 
-void* get(htable* hashtable,void* key){
+void* get(htable hashtable,void* key){
   int location;
   node* auxnode;
   if(hashtable==NULL)return NULL;
@@ -106,7 +106,7 @@ void* get(htable* hashtable,void* key){
   return NULL;
 }
 
-htable* resize(htable* hashtable){
+htable resize(htable hashtable){
   node **newtable, **oldtable, *auxnode;
   oldtable=hashtable->table;
   int i,oldsize=hashtable->size;
@@ -134,7 +134,7 @@ htable* resize(htable* hashtable){
   return hashtable;
 }
 
-int contains(htable* hashtable,void* key){
+int contains(htable hashtable,void* key){
   int location;
   node* auxnode;
 
@@ -152,7 +152,7 @@ int contains(htable* hashtable,void* key){
   return 0;
 }
 
-void removePair(htable* hashtable,void* key){
+void removePair(htable hashtable,void* key){
   int location;
   node *prev=NULL, *auxnode;
 
@@ -181,7 +181,7 @@ void removePair(htable* hashtable,void* key){
   }
 }
 
-void* put(htable* hashtable, void* key, void* value){
+void* put(htable hashtable, void* key, void* value){
   int location,equal=0;
   node *auxnode, *newnode;
 
@@ -284,10 +284,10 @@ int equalsInt(void* int1, void* int2){
   else return 0;
 }
 
-int giveSize(htable* hashtable){
+int giveSize(htable hashtable){
   return hashtable->size;
 }
 
-int giveUsed(htable* hashtable){
+int giveUsed(htable hashtable){
   return hashtable->used;
 }

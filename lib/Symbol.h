@@ -14,8 +14,8 @@ typedef struct _VarSymb_{
 void* cloneVar(void* var);
 VarSymb* newVar();
 void eraseVar(VarSymb* var);
-int getLocation(htable* hashtable,char* key);
-int getSize1(htable* hashtable,char* key);
-int getSize2(htable* hashtable,char* key);
+int getLocation(htable hashtable,char* key);
+int getSize1(htable hashtable,char* key);
+int getSize2(htable hashtable,char* key);
 
 #endif
