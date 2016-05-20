@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "HashT.h"
-#include <stdio.h>
 
 #define STARTINGSIZE 16
 #define LOADFACTOR 0.7

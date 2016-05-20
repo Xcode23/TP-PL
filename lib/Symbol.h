@@ -9,11 +9,11 @@ typedef struct _VarSymb_{
   int size1;
   int size2;
   int location;
-}VarSymb;
+}*VarSymb;
 
 void* cloneVar(void* var);
-VarSymb* newVar();
-void eraseVar(VarSymb* var);
+VarSymb newVar();
+void eraseVar(VarSymb var);
 int getLocation(htable hashtable,char* key);
 int getSize1(htable hashtable,char* key);
 int getSize2(htable hashtable,char* key);

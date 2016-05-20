@@ -26,7 +26,7 @@ void push(Stack stack,int value){
 int pop(Stack stack){
   Node node;
   int ret;
-  if(stack->top)return 0;
+  if(!stack->top)return 0;
   node=stack->top->next;
   ret=stack->top->num;
   free(stack->top);

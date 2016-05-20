@@ -17,6 +17,7 @@
   int aux=0;
 
   void declaration(char* id, int size1, int size2);
+  int where(char* id,int array,int matrix);
 %}
 
 %union{
@@ -52,7 +53,8 @@ StatL   :     StatL Stat
         |     Stat
         ;
 
-Stat    :     Variable '=' Exp ';'    {fprintf(output,"storel %d\n",$1);}
+Stat    :     Variable '='            {fprintf(output,"pushfp\nswap\n");}
+              Exp ';'                 {fprintf(output,"storen\n");}
 
         |     IF '(' Exp ')'          {push(labelStack,label);
                                        fprintf(output,"jz endif%d\n",label++);}
@@ -66,63 +68,84 @@ Stat    :     Variable '=' Exp ';'    {fprintf(output,"storel %d\n",$1);}
 
         |     WRITE '(' Lexp ')' ';'  {fprintf(output,"writes\n");}
 
-        |     READ '(' Variable ')' ';' {fprintf(output,"read\natoi\nstorel %d\n",$3);}
-        ;
+        |     READ '(' Variable ')' ';' {fprintf(output,"pushfp\nswap\nread\natoi\nstoren\n");}
+        ;     /*mudar se forem implementados tipos*/
 
-Lexp    :     Lexp ',' STRING
-        |     Lexp ',' Exp
-        |     STRING
-        |     Exp
-        ;
+Lexp    :     Lexp ',' STRING         {fprintf(output,"pushs %s\nconcat\n",$3);free($3);}
+        |     Lexp ',' Exp            {fprintf(output,"stri\nconcat\n");}
+        |     STRING                  {fprintf(output,"pushs %s\n",$1);free($1);}
+        |     Exp                     {fprintf(output,"stri\n");}
+        ; //cuidado com os tipos
 
-Exp     :     Exp '&' Equals/*must be in stack by the end*/
-        |     Exp '|' Equals
+Exp     :     Variable '='            {fprintf(output,"pushfp\nswap\n");}
+              Rhs                     {fprintf(output,"dup 3\nstoren\nswap\npop 1\nswap\npop 1\n");}
+        |     Rhs
+        ;  //cuidado com os tipos
+
+Rhs     :     Rhs '&' Equals          {fprintf(output,"mul\n");}
+        |     Rhs '|' Equals          {fprintf(output,"add\n");}
         |     Equals
         ;
 
-Equals  :     Equals EQUAL Differ
-        |     Equals DIFFERENT Differ
+Equals  :     Equals EQUAL Differ     {fprintf(output,"equal\n");}
+        |     Equals DIFFERENT Differ {fprintf(output,"equal\n");
+                                       fprintf(output,"dup 1\nnot\nequal\n");}
         |     Differ
         ;
 
-Differ  :     Differ SE Arit
-        |     Differ '<' Arit
-        |     Differ GE Arit
-        |     Differ '>' Arit
+Differ  :     Differ SE Arit          {fprintf(output,"infeq\n");}
+        |     Differ '<' Arit         {fprintf(output,"inf\n");}
+        |     Differ GE Arit          {fprintf(output,"supeq\n");}
+        |     Differ '>' Arit         {fprintf(output,"sup\n");}
         |     Arit
         ;
 
-Arit    :     Arit '+' Term
-        |     Arit '-' Term
+Arit    :     Arit '+' Term           {fprintf(output,"add\n");}
+        |     Arit '-' Term           {fprintf(output,"sub\n");}
         |     Term
         ;
 
-Term    :     Term '*' Factor
-        |     Term '/' Factor
-        |     Term '%' Factor
+Term    :     Term '*' Factor         {fprintf(output,"mul\n");}
+        |     Term '/' Factor         {fprintf(output,"div\n");}
+        |     Term '%' Factor         {fprintf(output,"mod\n");}
         |     Factor
         ;
 
-Factor  :     '!' Value
-        |     '-' Value
+Factor  :     '!' Value               {fprintf(output,"dup 1\nnot\nequal\n");}
+        |     '-' Value               {fprintf(output,"pushi 0\nswap\nsub\n");}
         |     Value
         ;
 
-Value   :     INT
-        |     Variable
+Value   :     INT                     {fprintf(output,"pushi %d\n",$1);}
+        |     Variable                {fprintf(output,"pushfp\nswap\nloadn\n");}
         |     '(' Exp ')'
         ;
 
-Variable:     ID/*return offset*/
-        |     ID '[' Exp ']'
-        |     ID '[' Exp ']' '[' Exp ']'
+Variable:     ID                      {fprintf(output,"pushi %d\n",where($1,0,0));free($1);}
+        |     ID '[' Exp ']'          {fprintf(output,"pushi %d\nadd\n",where($1,1,0));free($1);}
+        |     ID '[' Exp ']' '[' Exp ']'{fprintf(output,"pushi %d\nmul\nadd\n",getSize1(varSymT,$1));
+                                         fprintf(output,"pushi %d\nadd\n",where($1,1,1));free($1);}
         ;
 %%
+
+int where(char* id,int array,int matrix){
+  int loc=-1;
+  VarSymb aux;
+  if(!contains(varSymT,id))
+    yyerror("Variable not declared");
+  else{
+    if((!array==!getSize1(varSymT,id))&&(!matrix==!getSize2(varSymT,id)))
+      loc=getLocation(varSymT,id);
+    else
+      yyerror("inappropriate variable access");
+    }
+  return loc;
+}
 
 void declaration(char* id, int size1, int size2){
   if(contains(varSymT,id))yyerror("Variable declared twice");
   else{
-    VarSymb* var=newVar();
+    VarSymb var=newVar();
     var->name=id;
     var->type="int";
     var->size1=size1;
@@ -160,6 +183,7 @@ int main(int argc, char** argv){
 
   fprintf(output,"start\n");/******remember to move if functions are implemented******/
   yyparse();
+  fprintf(output,"stop\n");
 
   deleteHtable(varSymT);   //cleanup
   while(pop(labelStack));
