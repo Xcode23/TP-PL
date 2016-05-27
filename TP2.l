@@ -9,11 +9,15 @@
 %%
 
 if              return IF;
+else            return ELSE;
 while           return WHILE;
 read            return READ;
 write           return WRITE;
 decls           return DECLS;
 stats           return STATS;
+def             return DEF;
+return          return RETURN;
+main            return MAIN;
 \+              return '+';
 \-              return '-';
 \*              return '*';
@@ -37,6 +41,7 @@ stats           return STATS;
 \>\=            return GE;
 \=\=            return EQUAL;
 \!\=            return DIFFERENT;
+\#              return '#';
 [0-9]+          {yylval.ivalue=atoi(yytext);return INT;}
 
 \"(\\.|[^\\"])*\" {yylval.string=strdup(yytext);return STRING;}
