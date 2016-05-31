@@ -18,6 +18,7 @@
   int label=1;
   int aux=0;
   int maindec=0;
+  int global=0;
 
   void declaration(char* id, int size1, int size2);
   int where(char* id,int array,int matrix);
@@ -39,7 +40,7 @@
 %%
 
 Prog    :     DeclL                       {globalSymT=varSymT;
-                                           fprintf(output,"start\npusha main\ncall\njump end\n");}
+                                           fprintf(output,"start\npusha main\ncall\nnop\njump end\n");}
               FuncList /*no endmarker*/   {fprintf(output,"end:nop\n");}
         ;
 
@@ -94,8 +95,9 @@ StatL   :     StatL Stat
         |     Stat
         ;
 
-Stat    :     Variable '='                {fprintf(output,"pushfp\nswap\n");}
-              Exp ';'                     {fprintf(output,"storen\n");}
+Stat    :     Variable                    {if(global)fprintf(output,"pushgp\nswap\n");
+                                           else fprintf(output,"pushfp\nswap\n");}
+              '=' Exp ';'                 {fprintf(output,"storen\n");}
 
         |     IF '(' Exp ')'              {push(labelStack,label);
                                            fprintf(output,"jz endif%d\n",label++);}
@@ -112,7 +114,8 @@ Stat    :     Variable '='                {fprintf(output,"pushfp\nswap\n");}
 
         |     WRITE '(' Lexp ')' ';'      {fprintf(output,"writes\n");}
 
-        |     READ '(' Variable ')' ';'   {fprintf(output,"pushfp\nswap\nread\natoi\nstoren\n");}
+        |     READ '(' Variable ')' ';'   {if(global)fprintf(output,"pushgp\nswap\nread\natoi\nstoren\n");
+                                           else fprintf(output,"pushfp\nswap\nread\natoi\nstoren\n");}
 
         |     '#'ID'(' ArgLists ')' ';'   {funcCall($2,$4);
                                            fprintf(output,"pop %d\n",$4);
@@ -139,7 +142,8 @@ Lexp    :     Lexp ',' STRING             {fprintf(output,"pushs %s\nconcat\n",$
         |     Exp                         {fprintf(output,"stri\n");}
         ; //cuidado com os tipos
 
-Exp     :     Variable '='                {fprintf(output,"pushfp\nswap\n");}
+Exp     :     Variable '='                {if(global)fprintf(output,"pushgp\nswap\n");
+                                           else fprintf(output,"pushfp\nswap\n");}
               Rhs                         {fprintf(output,"dup 3\nstoren\nswap\npop 1\nswap\npop 1\n");}
         |     Rhs
         ;  //cuidado com os tipos
@@ -179,7 +183,8 @@ Factor  :     '!' Value                   {fprintf(output,"dup 1\nnot\nequal\n")
         ;
 
 Value   :     INT                         {fprintf(output,"pushi %d\n",$1);}
-        |     Variable                    {fprintf(output,"pushfp\nswap\nloadn\n");}
+        |     Variable                    {if(global)fprintf(output,"pushgp\nswap\nloadn\n");
+                                           else fprintf(output,"pushfp\nswap\nloadn\n");}
         |     '#' ID '('ArgList')'        {funcCall($2,$4);
                                            fprintf(output,"pop %d\npushg 0",$4);
                                            sPush(funcStack,varSymT);}
@@ -196,14 +201,25 @@ Variable:     ID                          {fprintf(output,"pushi %d\n",where($1,
 int where(char* id,int array,int matrix){
   int loc=-1;
   VarSymb aux;
-  if(!contains(varSymT,id))
-    yyerror("Variable not declared");
-  else{
-    if((!array==!getSize1(varSymT,id))&&(!matrix==!getSize2(varSymT,id)))
-      loc=getLocation(varSymT,id);
-    else
-      yyerror("Inappropriate variable access");
+  if(!contains(varSymT,id)){
+    if(!contains(globalSymT,id))yyerror("Variable not declared");
+    else{
+      if((!array==!getSize1(globalSymT,id))&&(!matrix==!getSize2(globalSymT,id))){
+        loc=getLocation(globalSymT,id);
+        global=1;
+      }
+      else
+        yyerror("Inappropriate access to global variable");
     }
+  }
+  else{
+    if((!array==!getSize1(varSymT,id))&&(!matrix==!getSize2(varSymT,id))){
+      loc=getLocation(varSymT,id);
+      global=0;
+    }
+    else
+      yyerror("Inappropriate access to local variable");
+  }
   return loc;
 }
 
@@ -211,7 +227,7 @@ void funcCall(char* func, int argc){
   if(!contains(funcTable,func))yyerror("Function not declared");
   else{
     if(getArgs(funcTable,func)!=argc)yyerror("Incorrect number of arguments in function call");
-    else fprintf(output,"pusha %s\ncall\n",func);
+    else fprintf(output,"pusha %s\ncall\nnop\n",func);
   }
 }
 
@@ -246,7 +262,7 @@ void declaration(char* id, int size1, int size2){
 }
 
 void yyerror (char const *s){
-  fprintf(stderr,"%d: %s at %s\n", yylineno, s);
+  fprintf(stderr,"%d: %s\n", yylineno, s);
   err=1;
 }
 
