@@ -24,6 +24,7 @@
   int where(char* id,int array,int matrix);
   void funcDeclaration(char* func, int argc);
   void funcCall(char* func, int argc);
+  void argDeclaration(char* id, int size1, int size2);
 %}
 
 %union{
@@ -70,7 +71,8 @@ Func    :     DEF ID                      {varSymT=newTable(hashString,equalsStr
 
               '{'DeclL STATS StatL'}'     {fprintf(output,"return\n");
                                            deleteHtable(varSymT);
-                                           varSymT=sPop(funcStack);}
+                                           //varSymT=sPop(funcStack);
+                                          }
 
         |     DEF MAIN                    {if(!maindec){
                                               maindec++;
@@ -87,8 +89,8 @@ ArgS    :     Args
         |                                 {$$=0;}
         ;
 
-Args    :     Args ',' ID                 {$$=$1+1;declaration($3,0,0);}
-        |     ID                          {$$=1;declaration($1,0,0);}
+Args    :     Args ',' ID                 {$$=$1+1;argDeclaration($3,0,0);}
+        |     ID                          {$$=1;argDeclaration($1,0,0);}
         ;
 
 StatL   :     StatL Stat
@@ -101,16 +103,17 @@ Stat    :     Variable                    {if(global)fprintf(output,"pushgp\nswa
 
         |     IF '(' Exp ')'              {push(labelStack,label);
                                            fprintf(output,"jz endif%d\n",label++);}
-              '{' StatL '}'               {fprintf(output,"jump endelse%d\nendif%d:nop\n",
-                                           aux=pop(labelStack),aux);
+              '{' StatL '}'               {aux=pop(labelStack);
+                                           fprintf(output,"jump endelse%d\nendif%d:nop\n",aux,aux);
                                            push(labelStack,aux);}
               Elsebranch
 
         |     WHILE                       {fprintf(output,"startloop%d:nop\n",label);}
               '(' Exp ')'                 {push(labelStack,label);
                                            fprintf(output,"jz endloop%d\n",label++);}
-              '{' StatL '}'               {fprintf(output, "jump startloop%d\n", aux = pop(labelStack));
-                                           fprintf(output,"endloop%d\n",aux);}
+              '{' StatL '}'               {aux = pop(labelStack);
+                                           fprintf(output, "jump startloop%d\n", aux);
+                                           fprintf(output,"endloop%d:nop\n",aux);}
 
         |     WRITE '(' Lexp ')' ';'      {fprintf(output,"writes\n");}
 
@@ -119,7 +122,8 @@ Stat    :     Variable                    {if(global)fprintf(output,"pushgp\nswa
 
         |     '#'ID'(' ArgLists ')' ';'   {funcCall($2,$4);
                                            fprintf(output,"pop %d\n",$4);
-                                           sPush(funcStack,varSymT);}
+                                           //sPush(funcStack,varSymT);
+                                          }
 
         |     RETURN Exp ';'              {fprintf(output,"storeg 0\nreturn\n");}
         ;     /*mudar se forem implementados tipos*/
@@ -132,7 +136,7 @@ ArgLists:     ArgList
         |                                 {$$=0;}
         ;
 
-ArgList :     Args ',' Exp                {$$=$1+1;}
+ArgList :     ArgList ',' Exp             {$$=$1+1;}
         |     Exp                         {$$=1;}
         ;
 
@@ -185,9 +189,10 @@ Factor  :     '!' Value                   {fprintf(output,"dup 1\nnot\nequal\n")
 Value   :     INT                         {fprintf(output,"pushi %d\n",$1);}
         |     Variable                    {if(global)fprintf(output,"pushgp\nswap\nloadn\n");
                                            else fprintf(output,"pushfp\nswap\nloadn\n");}
-        |     '#' ID '('ArgList')'        {funcCall($2,$4);
-                                           fprintf(output,"pop %d\npushg 0",$4);
-                                           sPush(funcStack,varSymT);}
+        |     '#' ID '('ArgLists')'       {funcCall($2,$4);
+                                           fprintf(output,"pop %d\npushg 0\n",$4);
+                                           //sPush(funcStack,varSymT);
+                                          }
         |     '(' Exp ')'
         ;
 
@@ -238,8 +243,8 @@ void funcDeclaration(char* func, int argc){
     newfunc->name=func;
     newfunc->args=argc;
     put(funcTable,func,newfunc);
-    eraseFunc(newfunc);
     fprintf(output,"%s:nop\n",func);
+    eraseFunc(newfunc);
   }
 }
 
@@ -258,6 +263,23 @@ void declaration(char* id, int size1, int size2){
     put(varSymT,id,var);
     eraseVar(var);
     fprintf(output, "pushn %d\n", size1*size2);
+  }
+}
+
+void argDeclaration(char* id, int size1, int size2){
+  if(contains(varSymT,id))yyerror("Variable declared more than once");
+  else{
+    VarSymb var=newVar();
+    var->name=id;
+    var->type="int";
+    var->size1=size1;
+    var->size2=size2;
+    var->location=location;
+    if(size1==0)size1++;
+    if(size2==0)size2++;
+    location+=size1*size2;
+    put(varSymT,id,var);
+    eraseVar(var);
   }
 }
 

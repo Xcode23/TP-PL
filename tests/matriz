@@ -1,0 +1,59 @@
+decls matrix[3][7],size1,size2;
+
+def max(){
+  decls max,i,j;
+  stats
+  max=matrix[0][0];
+  i=0;
+  while(i<size1){
+    j=0;
+    while(j<size2){
+      if(matrix[i][j]>max){max=matrix[i][j];}
+      j=j+1;
+    }
+    i=i+1;
+  }
+  return max;
+}
+
+def media(){
+  decls media,i,j;
+  stats
+  i=0;
+  while(i<size1){
+    j=0;
+    while(j<size2){
+      media=media+matrix[i][j];
+      j=j+1;
+    }
+    i=i+1;
+  }
+  media=media/(size1*size2);
+  return media;
+}
+
+def main{
+  decls i,j,size;
+  stats
+  write("Tamanho 1 da matriz\n");
+  read(size1);
+  if(size1>3){write("Demasiado grande\n");}
+  else{
+    write("Tamanho 2 da matriz\n");
+    read(size2);
+    if(size2>7){write("Demasiado grande\n");}
+    else{
+      i=0;
+      while(i<size1){
+        j=0;
+        while(j<size2){
+          write("Escreve um numero\n");
+          read(matrix[i][j]);
+          j=j+1;
+        }
+        i=i+1;
+      }
+      write("Media: ",#media(),"\nMaximo: ", #max(),"\n");
+    }
+  }
+}

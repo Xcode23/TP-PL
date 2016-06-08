@@ -1,0 +1,134 @@
+pushi 0
+start
+pusha main
+call
+nop
+jump end
+max:nop
+dup 3
+pushi 0
+storeg 0
+pushn 1
+pushi 0
+pushfp
+swap
+loadn
+pushi 1
+pushfp
+swap
+loadn
+supeq
+jz endif1
+pushi 3
+pushfp
+swap
+pushi 0
+pushfp
+swap
+loadn
+storen
+jump endelse1
+endif1:nop
+pushi 3
+pushfp
+swap
+pushi 1
+pushfp
+swap
+loadn
+storen
+endelse1:nop
+pushi 2
+pushfp
+swap
+loadn
+pushi 3
+pushfp
+swap
+loadn
+sup
+jz endif2
+pushi 3
+pushfp
+swap
+pushi 2
+pushfp
+swap
+loadn
+storen
+jump endelse2
+endif2:nop
+endelse2:nop
+pushi 3
+pushfp
+swap
+loadn
+storeg 0
+return
+return
+main:nop
+pushn 3
+pushn 1
+startloop3:nop
+pushi 3
+pushfp
+swap
+loadn
+pushi 3
+inf
+jz endloop3
+pushs "Escreve um numero\n"
+writes
+pushi 3
+pushfp
+swap
+loadn
+pushi 0
+add
+pushfp
+swap
+read
+atoi
+storen
+pushi 3
+pushfp
+swap
+pushi 3
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop3
+endloop3:nop
+pushs "O maior numero e:"
+pushi 0
+pushi 0
+add
+pushfp
+swap
+loadn
+pushi 1
+pushi 0
+add
+pushfp
+swap
+loadn
+pushi 2
+pushi 0
+add
+pushfp
+swap
+loadn
+pusha max
+call
+nop
+pop 3
+pushg 0
+stri
+concat
+writes
+return
+end:nop
+stop

@@ -1,0 +1,13 @@
+def main{
+  decls i,size,sum,temp;
+  stats
+  write("Quantos numeros vai ler?\n");
+  read(size);
+  while(i<size){
+    write("Escreva um numero\n");
+    read(temp);
+    sum=sum+temp;
+    i=i+1;
+  }
+  write("O somatorio é:", sum, "\n");
+}

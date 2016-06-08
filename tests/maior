@@ -1,0 +1,19 @@
+def max(prim,sec,ter){
+  decls max;
+  stats
+  if(prim>=sec){max=prim;}
+  else{max=sec;}
+  if(ter>max){max=ter;}
+  return max;
+}
+
+def main{
+  decls var[3],i;
+  stats
+  while(i<3){
+    write("Escreve um numero\n");
+    read(var[i]);
+    i=i+1;
+  }
+  write("O maior numero e:",#max(var[0],var[1],var[2]));
+}

@@ -1,0 +1,76 @@
+pushi 0
+start
+pusha main
+call
+nop
+jump end
+main:nop
+pushn 1
+pushn 1
+pushn 1
+pushn 1
+pushs "Quantos numeros vai ler?\n"
+writes
+pushi 1
+pushfp
+swap
+read
+atoi
+storen
+startloop1:nop
+pushi 0
+pushfp
+swap
+loadn
+pushi 1
+pushfp
+swap
+loadn
+inf
+jz endloop1
+pushs "Escreva um numero\n"
+writes
+pushi 3
+pushfp
+swap
+read
+atoi
+storen
+pushi 2
+pushfp
+swap
+pushi 2
+pushfp
+swap
+loadn
+pushi 3
+pushfp
+swap
+loadn
+add
+storen
+pushi 0
+pushfp
+swap
+pushi 0
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop1
+endloop1:nop
+pushs "O somatorio é:"
+pushi 2
+pushfp
+swap
+loadn
+stri
+concat
+pushs "\n"
+concat
+writes
+return
+end:nop
+stop

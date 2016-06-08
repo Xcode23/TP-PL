@@ -1,0 +1,38 @@
+decls var[100],size;
+
+def sort(){
+  decls i,j,x,aux;
+  stats
+  i=1;
+  while(i<size){
+    x=var[i];
+    j=i-1;
+    while((j>=0) & (var[j]>x)){
+      var[j+1]=var[j];
+      j=j-1;
+    }
+    var[j+1]=x;
+    i=i+1;
+  }
+}
+
+def main{
+  decls i;
+  stats
+  write("Quantos numeros vai ler?\n");
+  read(size);
+  if(size>100){write("Demasiados numeros\n");}
+  else{
+    while(i<size){
+      write("Escreva um numero\n");
+      read(var[i]);
+      i=i+1;
+    }
+    #sort();
+    i=0;
+    while(i<size){
+      write(var[i],"\n");
+      i=i+1;
+    }
+  }
+}

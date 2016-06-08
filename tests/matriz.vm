@@ -1,0 +1,394 @@
+pushi 0
+pushn 21
+pushn 1
+pushn 1
+start
+pusha main
+call
+nop
+jump end
+max:nop
+dup 0
+pushi 0
+storeg 0
+pushn 1
+pushn 1
+pushn 1
+pushi 0
+pushfp
+swap
+pushi 0
+pushi 0
+pushi 0
+mul
+add
+pushi 1
+add
+pushgp
+swap
+loadn
+storen
+pushi 1
+pushfp
+swap
+pushi 0
+storen
+startloop1:nop
+pushi 1
+pushfp
+swap
+loadn
+pushi 22
+pushgp
+swap
+loadn
+inf
+jz endloop1
+pushi 2
+pushfp
+swap
+pushi 0
+storen
+startloop2:nop
+pushi 2
+pushfp
+swap
+loadn
+pushi 23
+pushgp
+swap
+loadn
+inf
+jz endloop2
+pushi 1
+pushfp
+swap
+loadn
+pushi 2
+pushfp
+swap
+loadn
+pushi 0
+mul
+add
+pushi 1
+add
+pushgp
+swap
+loadn
+pushi 0
+pushfp
+swap
+loadn
+sup
+jz endif3
+pushi 0
+pushfp
+swap
+pushi 1
+pushfp
+swap
+loadn
+pushi 2
+pushfp
+swap
+loadn
+pushi 0
+mul
+add
+pushi 1
+add
+pushgp
+swap
+loadn
+storen
+jump endelse3
+endif3:nop
+endelse3:nop
+pushi 2
+pushfp
+swap
+pushi 2
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop2
+endloop2:nop
+pushi 1
+pushfp
+swap
+pushi 1
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop1
+endloop1:nop
+pushi 0
+pushfp
+swap
+loadn
+storeg 0
+return
+return
+media:nop
+dup 0
+pushi 0
+storeg 0
+pushn 1
+pushn 1
+pushn 1
+pushi 1
+pushfp
+swap
+pushi 0
+storen
+startloop4:nop
+pushi 1
+pushfp
+swap
+loadn
+pushi 22
+pushgp
+swap
+loadn
+inf
+jz endloop4
+pushi 2
+pushfp
+swap
+pushi 0
+storen
+startloop5:nop
+pushi 2
+pushfp
+swap
+loadn
+pushi 23
+pushgp
+swap
+loadn
+inf
+jz endloop5
+pushi 0
+pushfp
+swap
+pushi 0
+pushfp
+swap
+loadn
+pushi 1
+pushfp
+swap
+loadn
+pushi 2
+pushfp
+swap
+loadn
+pushi 0
+mul
+add
+pushi 1
+add
+pushgp
+swap
+loadn
+add
+storen
+pushi 2
+pushfp
+swap
+pushi 2
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop5
+endloop5:nop
+pushi 1
+pushfp
+swap
+pushi 1
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop4
+endloop4:nop
+pushi 0
+pushfp
+swap
+pushi 0
+pushfp
+swap
+loadn
+pushi 22
+pushgp
+swap
+loadn
+pushi 23
+pushgp
+swap
+loadn
+mul
+div
+storen
+pushi 0
+pushfp
+swap
+loadn
+storeg 0
+return
+return
+main:nop
+pushn 1
+pushn 1
+pushn 1
+pushs "Tamanho 1 da matriz\n"
+writes
+pushi 22
+pushgp
+swap
+read
+atoi
+storen
+pushi 22
+pushgp
+swap
+loadn
+pushi 3
+sup
+jz endif6
+pushs "Demasiado grande\n"
+writes
+jump endelse6
+endif6:nop
+pushs "Tamanho 2 da matriz\n"
+writes
+pushi 23
+pushgp
+swap
+read
+atoi
+storen
+pushi 23
+pushgp
+swap
+loadn
+pushi 7
+sup
+jz endif7
+pushs "Demasiado grande\n"
+writes
+jump endelse7
+endif7:nop
+pushi 0
+pushfp
+swap
+pushi 0
+storen
+startloop8:nop
+pushi 0
+pushfp
+swap
+loadn
+pushi 22
+pushgp
+swap
+loadn
+inf
+jz endloop8
+pushi 1
+pushfp
+swap
+pushi 0
+storen
+startloop9:nop
+pushi 1
+pushfp
+swap
+loadn
+pushi 23
+pushgp
+swap
+loadn
+inf
+jz endloop9
+pushs "Escreve um numero\n"
+writes
+pushi 0
+pushfp
+swap
+loadn
+pushi 1
+pushfp
+swap
+loadn
+pushi 0
+mul
+add
+pushi 1
+add
+pushgp
+swap
+read
+atoi
+storen
+pushi 1
+pushfp
+swap
+pushi 1
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop9
+endloop9:nop
+pushi 0
+pushfp
+swap
+pushi 0
+pushfp
+swap
+loadn
+pushi 1
+add
+storen
+jump startloop8
+endloop8:nop
+pushs "Media: "
+pusha media
+call
+nop
+pop 0
+pushg 0
+stri
+concat
+pushs "\nMaximo: "
+concat
+pusha max
+call
+nop
+pop 0
+pushg 0
+stri
+concat
+pushs "\n"
+concat
+writes
+endelse7:nop
+endelse6:nop
+return
+end:nop
+stop
