@@ -53,7 +53,7 @@ def main{
         }
         i=i+1;
       }
-      write("Media: ",#media(),"\nMaximo: ", #max(),"\n");
+      write("Media: ",media(),"\nMaximo: ", max(),"\n");
     }
   }
 }

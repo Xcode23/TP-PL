@@ -19,6 +19,7 @@
   int aux=0;
   int maindec=0;
   int global=0;
+  int size=0;
 
   void declaration(char* id, int size1, int size2);
   int where(char* id,int array,int matrix);
@@ -120,8 +121,8 @@ Stat    :     Variable                    {if(global)fprintf(output,"pushgp\nswa
         |     READ '(' Variable ')' ';'   {if(global)fprintf(output,"pushgp\nswap\nread\natoi\nstoren\n");
                                            else fprintf(output,"pushfp\nswap\nread\natoi\nstoren\n");}
 
-        |     '#'ID'(' ArgLists ')' ';'   {funcCall($2,$4);
-                                           fprintf(output,"pop %d\n",$4);
+        |     ID'(' ArgLists ')' ';'   {funcCall($1,$3);
+                                           fprintf(output,"pop %d\n",$3);
                                            //sPush(funcStack,varSymT);
                                           }
 
@@ -189,8 +190,8 @@ Factor  :     '!' Value                   {fprintf(output,"dup 1\nnot\nequal\n")
 Value   :     INT                         {fprintf(output,"pushi %d\n",$1);}
         |     Variable                    {if(global)fprintf(output,"pushgp\nswap\nloadn\n");
                                            else fprintf(output,"pushfp\nswap\nloadn\n");}
-        |     '#' ID '('ArgLists')'       {funcCall($2,$4);
-                                           fprintf(output,"pop %d\npushg 0\n",$4);
+        |     ID '('ArgLists')'       {funcCall($1,$3);
+                                           fprintf(output,"pop %d\npushg 0\n",$3);
                                            //sPush(funcStack,varSymT);
                                           }
         |     '(' Exp ')'
@@ -198,10 +199,22 @@ Value   :     INT                         {fprintf(output,"pushi %d\n",$1);}
 
 Variable:     ID                          {fprintf(output,"pushi %d\n",where($1,0,0));free($1);}
         |     ID '[' Exp ']'              {fprintf(output,"pushi %d\nadd\n",where($1,1,0));free($1);}
-        |     ID '[' Exp ']' '[' Exp ']'  {fprintf(output,"pushi %d\nmul\nadd\n",getSize1(varSymT,$1));
+        |     ID '[' Exp ']' '[' Exp ']'  {size=getSize1(varSymT,$1);
+                                           if(!size){
+                                             size=getSize1(globalSymT,$1);
+                                           }
+                                           fprintf(output,"pushi %d\nmul\nadd\n",size);
                                            fprintf(output,"pushi %d\nadd\n",where($1,1,1));free($1);}
         ;
 %%
+
+int getSize(char* key){
+  int size=0;
+  size=getSize1(varSymT,$1);
+  if(!size)
+    size=getSize1(globalSymT,$1);
+  return size;
+}
 
 int where(char* id,int array,int matrix){
   int loc=-1;
